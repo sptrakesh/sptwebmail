@@ -1,0 +1,132 @@
+<?xml version='1.0'?>
+
+<!-- Version: $Id: build.xml 47 2008-11-19 16:07:30Z sptrakesh $ -->
+ 
+<project name='${project.name}' default='deploy' basedir='.'>
+    
+  <property environment='env' />
+  <property file='ant.properties' />
+
+  <patternset id='fileset.resources'>
+    <include name='**/*properties' />
+    <include name='**/*xml' />
+    <include name='**/*gif' />
+    <include name='**/*jpg' />
+    <include name='**/*png' />
+  </patternset>
+
+  <target name='clean' description='Clears all generated files, including build directories, distributables, and documentation.'>
+    <delete dir='${dir.build}' />
+    <delete dir='${dir.deploy}' />
+    <delete dir='${dir.docs}' />
+  </target>
+
+  <path id='compile.classpath'>
+    <pathelement path='${activation.lib.jar}' />
+    <pathelement path='${echo2.app.lib.jar}' />
+    <pathelement path='${echo2.webcontainer.lib.jar}' />
+    <pathelement path='${echo2.webrender.lib.jar}' />
+    <pathelement path='${echopoint.lib.jar}' />
+    <pathelement path='${echo2extras.app.lib.jar}' />
+    <pathelement path='${echo2extras.webcontainer.lib.jar}' />
+    <pathelement path='${echo2consultas.lib.jar}' />
+    <pathelement path='${fileupload.app.lib.jar}' />
+    <pathelement path='${jazzy.lib.jar}' />
+    <pathelement path='${jdom.lib.jar}' />
+    <pathelement path='${lucene.lib.jar}' />
+    <pathelement path='${mail.lib.jar}' />
+    <pathelement path='${servlet.lib.jar}' />
+    <pathelement path='${tnef.lib.jar}' />
+    <pathelement path='${xstream.lib.jar}' />
+  </path>
+  <target name='compile' description='Compiles the application source files.'>
+    <mkdir dir='${dir.build}' />
+    <mkdir dir='${dir.deploy}' />
+    <javac destdir='${dir.build}' debug='${debug}' 
+      deprecation='yes' optimize='on'>
+      <classpath>
+        <path refid='compile.classpath' />
+      </classpath>
+      <src path='${dir.src}'/>
+      <exclude name='test/**'/>
+    </javac>
+  </target>
+
+  <target name='jar' depends='compile' description='Builds jar archives with all compiled classes for application.'>
+    <jar jarfile='${dir.deploy}/${jarfile}' basedir='${dir.build}'
+      includes='com/sptci/**'>
+      <metainf dir='${dir.config}'>
+        <patternset refid='fileset.resources' />
+      </metainf>
+    </jar>
+  </target>
+
+  <target name='war' depends='jar' 
+    description='Builds a web archive of the application.'>
+    <delete file='${dir.deploy}/${warfile}' />
+    <war destfile='${dir.deploy}/${warfile}'
+      webxml='${dir.config}/web.xml'>
+      <lib file='${dir.deploy}/${jarfile}' />
+      <lib file='${echo2.app.lib.jar}' />
+      <lib file='${echo2.webcontainer.lib.jar}' />
+      <lib file='${echo2.webrender.lib.jar}' />
+      <lib file='${echopoint.lib.jar}' />
+      <lib file='${echo2extras.app.lib.jar}' />
+      <lib file='${echo2extras.webcontainer.lib.jar}' />
+      <lib file='${echo2consultas.lib.jar}' />
+      <lib file='${fileupload.lib.jar}' />
+      <lib file='${fileupload.app.lib.jar}' />
+      <lib file='${fileupload.webcontainer.lib.jar}' />
+      <lib file='${jazzy.lib.jar}' />
+      <lib file='${jdom.lib.jar}' />
+      <lib file='${lucene.lib.jar}' />
+      <lib file='${tnef.lib.jar}' />
+      <lib file='${xpp3.lib.jar}' />
+      <lib file='${xstream.lib.jar}' />
+      <metainf file='${dir.config}/context.xml' />
+    </war>
+  </target>
+
+  <target name='deploy' depends='war'
+    description='Deploy the web application archives to the application server'>
+    <copy todir='${dir.tomcat.apps}' file='${dir.deploy}/${warfile}' />
+  </target>
+
+  <path id='javadoc.sources'>
+    <pathelement path='${dir.src}' />
+  </path>
+  <path id='javadoc.classpath'>
+    <pathelement path='${dir.build}' />
+    <pathelement path='${activation.lib.jar}' />
+    <pathelement path='${echo2.app.lib.jar}' />
+    <pathelement path='${echo2.webcontainer.lib.jar}' />
+    <pathelement path='${echo2.webrender.lib.jar}' />
+    <pathelement path='${echopoint.lib.jar}' />
+    <pathelement path='${echo2extras.app.lib.jar}' />
+    <pathelement path='${echo2extras.webcontainer.lib.jar}' />
+    <pathelement path='${echo2consultas.lib.jar}' />
+    <pathelement path='${fileupload.app.lib.jar}' />
+    <pathelement path='${jazzy.lib.jar}' />
+    <pathelement path='${jdom.lib.jar}' />
+    <pathelement path='${lucene.lib.jar}' />
+    <pathelement path='${mail.lib.jar}' />
+    <pathelement path='${servlet.lib.jar}' />
+    <pathelement path='${tnef.lib.jar}' />
+    <pathelement path='${xstream.lib.jar}' />
+  </path>
+  <target name='docs' depends='compile'
+    description='Generate Java API docs for the sources used for the project.' >
+    <mkdir dir='${dir.docs}' />
+    <javadoc sourcepathref='javadoc.sources' destdir='${dir.docs}'
+      classpathref='javadoc.classpath' version='yes' 
+      author='yes' use='yes' splitindex='yes' 
+      Windowtitle='Web Mail Application API'
+      linksource='yes' access='private' defaultexcludes='yes' >
+      <packageset dir='${dir.src}'>
+        <include name='com/sptci/**' />
+      </packageset>
+      <doctitle><![CDATA[<h1>SPT Web Mail Application API</h1>]]></doctitle>
+    </javadoc>
+  </target>
+
+</project>

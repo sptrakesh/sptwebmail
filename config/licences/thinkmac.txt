@@ -1,0 +1,11 @@
+"This is a legal agreement between You, the purchaser, and "ThinkMac Software" (trading name of Mr. Rory Prior). By purchasing any royalty-free icons from our website, you agree to the following:
+
+All of the icons remain the property of ThinkMac Software. We grant you a non-exclusive license to use the icons royalty-free for any personal or commercial projects provided they are both legal and decent.
+
+Modifications to the icon images are limited to composing combinations of the included icons and to hue, saturation, brightness adjustments and the removal of shadows or reflections as may be necessary for a given application.
+
+Neither the original or modified icons may be resold or redistributed by the licensee except as an integral part of a larger work (e.g. as toolbar icons in a software product).
+
+ThinkMac Software, shall not be held liable for any damages, whether direct, indirect, consequential or incidental, arising out of the use of, or the inability to use, these icons.
+
+This License Agreement shall remain in full force and effect throughout the entire duration of use of the icons. It shall be terminated in the event the licensee does not comply with the terms and conditions of this agreement and/or if full payment is not made."

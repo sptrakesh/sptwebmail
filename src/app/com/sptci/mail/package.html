@@ -1,0 +1,18 @@
+<body>
+  Package to hold core classes that abstracts interactions with
+  JavaMail API.  These classes help to present a uniform view of
+  the mail store regardless of whether the application talks to
+  a IMAP store or a POP3 store.
+
+  <ol>
+    <li>{#link com.sptci.mail.StoreManager} The class used to manage
+    connections to the mail store.</li>
+    <li>{@link com.sptci.mail.FolderManager} The class used to
+    manager mail folders.</li>
+    <li>{@link com.sptci.mail.Folder} An abstraction of a mail folder
+    used to present a disconnected view of a mail store folder.  Also
+    useful to represent a locally cached folder.</li>
+    <li>{@link com.sptci.mail.Message} An abstraction of a mail message,
+    parsed and processed to display friendly format.</li>
+  </ol>
+</body>

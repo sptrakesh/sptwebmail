@@ -1,0 +1,528 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"  
+  "http://www.w3.org/TR/html4/loose.dtd">  
+<html>
+<head>
+<title>SPT Web Mail Application</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<meta name="generator" content="TeX4ht (http://www.cse.ohio-state.edu/~gurari/TeX4ht/mn.html)"> 
+<meta name="originator" content="TeX4ht (http://www.cse.ohio-state.edu/~gurari/TeX4ht/mn.html)"> 
+<meta name="src" content="SPTWebMail.tex"> 
+<meta name="date" content="2007-01-14 12:03:00"> 
+<link rel="stylesheet" type="text/css" href="SPTWebMail.css"> 
+</head>
+
+<body bgcolor="#FFFFFF" text="#000000">
+
+<h3>Version 2</h3>
+
+<div id='wrapper' style='width: 100%'>
+  <div id='left' style='float: left; width: 60%;'>
+    SPT is starting work on version 2 of the web mail application.  The new
+    version will be based on
+    <a href='http://echo.nextapp.com/site/echo3'>Echo3</a> and
+    <a href='https://echopoint.dev.java.net/'>EchoPoint</a>.  A entirely
+    new mail store abstraction layer that uses Lucene indices to store
+    message and folder meta-data has been developed and will form the core
+    of the new application.  This should help reduce the number of requests
+    to the mail store as well as offer advanced searching and tagging
+    features to the application.  The version 1 code has been moved to
+    <code>branches/v1</code> in subversion.  The new version will also
+    allow IMAP style access to POP3 stores.
+  </div>
+
+  <div id='right' style='float: right; width: 35%'>
+    If you would like to contribute to the development of version 2 of
+    the application, please make a donation through the PayPal link below.
+    Your donations will help us allocate more time towards completion of
+    the project.
+
+    <form action="https://www.paypal.com/cgi-bin/webscr" method="post">
+    <input type="hidden" name="cmd" value="_s-xclick">
+    <input type="hidden" name="hosted_button_id" value="3859011">
+    <input type="image" src="https://www.paypal.com/en_US/i/btn/btn_donateCC_LG.gif" border="0" name="submit" alt="PayPal - The safer, easier way to pay online!">
+    <img alt="" border="0" src="https://www.paypal.com/en_US/i/scr/pixel.gif" width="1" height="1">
+    </form>
+  </div>
+</div>
+
+
+<div id='noop' style='float: left; width: 100%'>
+<h3 class="sectionHead"><span class="titlemark">1   </span> <a 
+ id="x1-30001"></a>Introduction</h3>
+<!--l. 62--><p class="noindent">The <span 
+class="cmss-10">SPT Web Mail Application </span>is built primarily using the <a 
+href="http://www.nextapp.com/platform/echo2/echo/" ><span 
+class="cmss-10">Echo2</span></a> and <a 
+href="http://sourceforge.net/project/showfiles.php?group_id=57452&package_id=184922" ><span 
+class="cmss-10">EchoPointNG</span></a> <span 
+class="cmss-10">AJAX </span>frameworks to develop the web
+interface. It uses <a 
+href="http://java.sun.com/products/javamail/" ><span 
+class="cmss-10">JavaMail API</span></a> as the middleware to connect to mail stores. The application has been tested only with
+<a 
+href="http://www.ietf.org/rfc/rfc2060.txt" ><span 
+class="cmss-10">IMAP</span></a> stores<span class="footnote-mark"><a 
+href="SPTWebMail2.html#fn1x0"><sup>1</sup></a></span><a 
+ id="x1-3001f1"></a> .
+<!--l. 68--><p class="noindent"><a 
+href="http://www.sptci.com/" ><span 
+class="cmss-10">Sans Pareil Technologies, Inc.</span></a> decided to develop yet another <a 
+href="http://java.sun.com/" ><span 
+class="cmss-10">Java</span></a> web mail application, since none of the freely
+available applications worked as we would like them to. We did not look at PHP, PERL, Python, based
+applications since we did not want to deal with the hassles involved in setting up all the required libraries to get
+those to work.
+
+
+<h3 class="sectionHead"><span class="titlemark">2   </span> <a 
+href="#QQ2-1-4" id="x1-40002">Goals</a></h3>
+<!--l. 75--><p class="noindent">The following goals were kept in mind while developing the application:
+<!--l. 77--><p class="noindent">
+     <ol  class="enumerate1" >
+     <li class="enumerate" value="1" 
+><a 
+ id="x1-4002x1"></a>The  user  interface  should  follow  the  <span 
+class="cmss-10">Rich  Internet  Application  </span>concept  and  try  and  mimic  the
+     behaviour of a desktop mail client as far as possible. The interface and components were designed
+     based upon my experience using Apple Mail.
+     </li>
+     <li class="enumerate" value="2" 
+><a 
+ id="x1-4004x2"></a>Minimise the setup steps required to deploy the application.
+     </li>
+     <li class="enumerate" value="3" 
+><a 
+ id="x1-4006x3"></a>Minimise  dependencies  on  services  other  than  a  connection  to  the  mail  store  and  a  writable
+     filesystem.
+     </li>
+     <li class="enumerate" value="4" 
+><a 
+ id="x1-4008x4"></a>Designed primarily as a single store system, while making it possible to support different mail stores
+     on a per user basis at a later date.
+     </li>
+     <li class="enumerate" value="5" 
+><a 
+ id="x1-4010x5"></a>Use only freely available and licenced libraries to implement features<span class="footnote-mark"><a 
+href="#fn2x0"><sup>2</sup></a></span><a 
+ id="x1-4011f2"></a> .</li>
+     <li class="enumerate" value="6" 
+>Add features until the system can compete with Desktop Mail Clients in terms of ease of use and features.</li></ol>
+                                                                                       
+<!--l. 95--><p class="noindent">
+<h3 class="sectionHead"><span class="titlemark">3   </span> <a 
+ id="x1-50003"></a>Features</h3>
+<!--l. 97--><p class="noindent">The <span 
+class="cmss-10">SPT Web Mail Application </span>application currently provides only rudimentary features that are sufficient for it
+to serve as an emergency mail access system. See section <a 
+href="#x1-70003.2">3.2<!--tex4ht:ref: sec:future --></a> for a list of features that will be added to the
+system in subsequent releases.
+<!--l. 103--><p class="noindent">
+<h4 class="subsectionHead"><span class="titlemark">3.1   </span> <a 
+ id="x1-60003.1"></a>Current Features</h4>
+<!--l. 105--><p class="noindent">The following are some of the primary features available in the first release of the <span 
+class="cmss-10">SPT Web Mail</span>
+<span 
+class="cmss-10">Application</span>.
+<!--l. 108--><p class="noindent">
+     <ol  class="enumerate1" >
+     <li class="enumerate" value="1" 
+><a 
+ id="x1-6002x1"></a>Automatically check for new messages. This feature can be turned off by the user.
+     </li>
+     <li class="enumerate" value="2" 
+><a 
+ id="x1-6004x2"></a>Comprehensive mail folder management - create, rename, delete.
+     </li>
+     <li class="enumerate" value="3" 
+><a 
+ id="x1-6006x3"></a>Comprehensive message management - compose, reply, reply all, forward, draft messages<span class="footnote-mark"><a 
+href="SPTWebMail4.html#fn3x0"><sup>3</sup></a></span><a 
+ id="x1-6007f3"></a> .
+     </li>
+     <li class="enumerate" value="4" 
+><a 
+ id="x1-6009x4"></a>Move deleted messages to standard folder used by user&#8217;s preferred e-mail client.
+     </li>
+     <li class="enumerate" value="5" 
+><a 
+ id="x1-6011x5"></a>Move sent messages to standard folder used by user&#8217;s preferred e-mail client.
+     </li>
+     <li class="enumerate" value="6" 
+><a 
+ id="x1-6013x6"></a>Address Book.
+     </li>
+     <li class="enumerate" value="7" 
+><a 
+ id="x1-6015x7"></a>Search messages by subject, sender, and/or body content. Also supports search across all the mail
+     folders. Search is implemented using <a 
+href="http://java.sun.com/products/javamail/" ><span 
+class="cmss-10">JavaMail API</span></a> search features and is not meant as a high
+     performance feature.
+     </li>
+     <li class="enumerate" value="8" 
+><a 
+ id="x1-6017x8"></a>Process TNEF streams and display contents/attachments in original format.
+     </li>
+     <li class="enumerate" value="9" 
+><a 
+ id="x1-6019x9"></a>Multiple selection of messages for bulk copy/move/delete operations in message list view.
+     </li>
+     <li class="enumerate" value="10" 
+><a 
+ id="x1-6021x10"></a>Spell checking while composing messages using <a 
+href="http://jazzy.sourceforge.net/" >Jazzy</a> spell checking engine. See FAQ <a 
+href="#x1-200007.5">7.5<!--tex4ht:ref: sec:spell --></a>.</li></ol>
+                                                                                       
+
+                                                                                       
+<!--l. 133--><p class="noindent">
+<h4 class="subsectionHead"><span class="titlemark">3.2   </span> <a 
+ id="x1-70003.2"></a>Planned Features</h4>
+<!--l. 135--><p class="noindent">The following are some of the primary features that will be added to the <span 
+class="cmss-10">SPT Web Mail Application </span>in future
+releases.
+<!--l. 138--><p class="noindent">
+     <ol  class="enumerate1" >
+     <li class="enumerate" value="1" 
+><a 
+ id="x1-7002x1"></a>Support mail server connection using JNDI resource.
+     </li>
+     <li class="enumerate" value="2" 
+><a 
+ id="x1-7004x2"></a>Expand properties to handle multiple server connections and enable selection of configured server
+     set in login screen.
+     </li>
+     <li class="enumerate" value="3" 
+><a 
+ id="x1-7006x3"></a>Expand preferences to include signature(s).
+     </li>
+     <li class="enumerate" value="4" 
+><a 
+ id="x1-7008x4"></a>Integrate <a 
+href="http://www.jasen.org/" >jASEN</a> anti-SPAM engine.
+     </li>
+     <li class="enumerate" value="5" 
+><a 
+ id="x1-7010x5"></a>Consider <a 
+href="http://javamail-crypto.sourceforge.net/" >JavaMail-Crypto</a> or <a 
+href="http://jpgpmime.sourceforge.net/" >PGPMime</a> for OpenPGP and S/MIME encryption of messages.
+     </li>
+     <li class="enumerate" value="6" 
+><a 
+ id="x1-7012x6"></a>Support composing and viewing e-mail as Plain text.
+     </li>
+     <li class="enumerate" value="7" 
+><a 
+ id="x1-7014x7"></a>Support for user preferences such as deleting messages older than a certain date - applicable for
+     deleted, sent and spam messages.
+     </li>
+     <li class="enumerate" value="8" 
+><a 
+ id="x1-7016x8"></a>Support import (drag-and-drop if possible) of VCF and LDIF format address cards into address
+     book.
+     </li>
+     <li class="enumerate" value="9" 
+><a 
+ id="x1-7018x9"></a>Support LDAP directory look up from Address Book.
+     </li>
+     <li class="enumerate" value="10" 
+><a 
+ id="x1-7020x10"></a>Add multiple selection for dragging and dropping <span 
+class="cmss-10">Person </span>entries in the <span 
+class="cmss-10">Address Book </span>to the <span 
+class="cmss-10">Group</span>
+     if possible.
+     </li>
+     <li class="enumerate" value="11" 
+><a 
+ id="x1-7022x11"></a>Allow option to reply/forward messages either as inline or attachment to new message<span class="footnote-mark"><a 
+href="SPTWebMail5.html#fn4x0"><sup>4</sup></a></span><a 
+ id="x1-7023f4"></a> .
+     </li>
+     <li class="enumerate" value="12" 
+><a 
+ id="x1-7025x12"></a>Experiment with custom message flags and integrate into the product.
+     </li>
+     <li class="enumerate" value="13" 
+><a 
+ id="x1-7027x13"></a>Implement simple rules engine to act upon messages based on sender/subject.
+                                                                                       
+
+                                                                                       
+     </li>
+     <li class="enumerate" value="14" 
+><a 
+ id="x1-7029x14"></a>Support <span 
+class="cmss-10">public </span>and <span 
+class="cmss-10">shared namespaces </span>that may be available to the user.
+     </li>
+     <li class="enumerate" value="15" 
+><a 
+ id="x1-7031x15"></a>Experiment with keyboard shortcuts to perform common operations.</li></ol>
+<!--l. 167--><p class="noindent">
+
+<h3 class="sectionHead"><span class="titlemark">4   </span> <a 
+href="#QQ2-1-8" id="x1-80004">Installation</a></h3>
+<!--l. 167--><p class="noindent">The <span 
+class="cmss-10">SPT Web Mail Application </span>is relatively easy to install. Table 1 shows the versions of Java/J2EE
+that are necessary for the system. Table 2 shows the environment in which the system has been
+tested.
+<div class="table">
+                                                                                       
+
+                                                                                       
+<!--l. 171--><p class="noindent"><a 
+ id="x1-80011"></a><hr class="float"><div class="float" 
+><table class="float"><tr class="float"><td class="float" 
+>
+                                                                                       
+
+                                                                                       
+ <table class="caption" 
+><tr valign="baseline" class="caption"><td class="id">Table&#x00A0;1: </td><td  
+class="content">Java Requirements</td></tr></table><!--tex4ht:label?: x1-80011 -->
+<div class="tabular"><table class="tabular" 
+cellspacing="0" cellpadding="0" rules="groups" 
+frame="border" id="TBL-1-" ><colgroup id="TBL-1-1g"><col 
+id="TBL-1-1"></colgroup><colgroup id="TBL-1-2g"><col 
+id="TBL-1-2"></colgroup><colgroup id="TBL-1-3g"><col 
+id="TBL-1-3"></colgroup><tr 
+class="hline"><td><hr></td><td><hr></td><td><hr></td></tr><tr  
+ valign="baseline" id="TBL-1-1-"><td  style="white-space:nowrap; text-align:left;" id="TBL-1-1-1"  
+class="td11"><span 
+class="cmbx-10">Software</span></td><td  style="white-space:nowrap; text-align:left;" id="TBL-1-1-2"  
+class="td11"><span 
+class="cmbx-10">Version</span></td><td  style="white-space:nowrap; text-align:left;" id="TBL-1-1-3"  
+class="td11"><span 
+class="cmbx-10">Description                                                </span></td>
+</tr><tr 
+class="hline"><td><hr></td><td><hr></td><td><hr></td></tr><tr  
+ valign="baseline" id="TBL-1-2-"><td  style="white-space:nowrap; text-align:left;" id="TBL-1-2-1"  
+class="td11">Java       </td><td  style="white-space:nowrap; text-align:left;" id="TBL-1-2-2"  
+class="td11">1.5       </td><td  style="white-space:nowrap; text-align:left;" id="TBL-1-2-3"  
+class="td11">Minimum version of the JRE that is required.            </td>
+</tr><tr 
+class="hline"><td><hr></td><td><hr></td><td><hr></td></tr><tr  
+ valign="baseline" id="TBL-1-3-"><td  style="white-space:nowrap; text-align:left;" id="TBL-1-3-1"  
+class="td11">Servlet    </td><td  style="white-space:nowrap; text-align:left;" id="TBL-1-3-2"  
+class="td11">1.3       </td><td  style="white-space:nowrap; text-align:left;" id="TBL-1-3-3"  
+class="td11">Minimum version of the Servlet API that is required.   </td>
+</tr><tr 
+class="hline"><td><hr></td><td><hr></td><td><hr></td></tr><tr  
+ valign="baseline" id="TBL-1-4-"><td  style="white-space:nowrap; text-align:left;" id="TBL-1-4-1"  
+class="td11">JavaMail </td><td  style="white-space:nowrap; text-align:left;" id="TBL-1-4-2"  
+class="td11">1.4       </td><td  style="white-space:nowrap; text-align:left;" id="TBL-1-4-3"  
+class="td11">Minimum version of the JavaMail API that is required.</td>
+</tr><tr 
+class="hline"><td><hr></td><td><hr></td><td><hr></td></tr><tr  
+ valign="baseline" id="TBL-1-5-"><td  style="white-space:nowrap; text-align:left;" id="TBL-1-5-1"  
+class="td11">             </td>
+</tr></table></div>
+                                                                                       
+
+                                                                                       
+</td></tr></table></div><hr class="endfloat" />
+</div>
+<!--l. 187--><p class="noindent">The following steps describe the process of deploying the <span 
+class="cmss-10">SPT Web Mail Application </span>to a J2EE/Servlet
+container.
+     <ol  class="enumerate1" >
+     <li class="enumerate" value="1" 
+><a 
+ id="x1-8003x1"></a>Create a root directory under which persistent files used by the <span 
+class="cmss-10">SPT Web Mail Application </span>are to
+     be stored. For example, <a 
+href="http://www.sptci.com/" ><span 
+class="cmss-10">Sans Pareil Technologies, Inc.</span></a> uses a directory named <span 
+class="cmtt-10">/var/data/webmail</span>
+     as the root <span 
+class="cmss-10">data directory</span>. Ensure that this directory is writable by the system user that is used to
+     run the container.
+     </li>
+     <li class="enumerate" value="2" 
+><a 
+ id="x1-8005x2"></a>Edit the <span 
+class="cmtt-10">config/properties.xml </span>file<span class="footnote-mark"><a 
+href="SPTWebMail6.html#fn5x0"><sup>5</sup></a></span><a 
+ id="x1-8006f5"></a> 
+     and modify the IMAP and SMTP server connection properties to match your environment. Copy
+     the modified file to the <span 
+class="cmss-10">data directory</span>.
+     </li>
+     <li class="enumerate" value="3" 
+><a 
+ id="x1-8008x3"></a>Copy the <span 
+class="cmtt-10">config/preferences.xml </span>file to the <span 
+class="cmss-10">data directory</span>.
+     </li>
+     <li class="enumerate" value="4" 
+><a 
+ id="x1-8010x4"></a>Copy the <span 
+class="cmtt-10">config/dictionary </span>directory to the <span 
+class="cmss-10">data directory</span>. This directory contains the dictionary
+     files required by the <a 
+href="http://jazzy.sourceforge.net/" ><span 
+class="cmss-10">Jazzy</span></a> spell checking engine. See section <a 
+href="#x1-210007.6">7.6<!--tex4ht:ref: sec:dictionary --></a> for more details.
+     </li>
+     <li class="enumerate" value="5" 
+><a 
+ id="x1-8012x5"></a>Configure a JVM system property named <span 
+class="cmtt-10">sptmail.data.directory </span>for the container. For Tomcat for
+     example, add a line similar to the following to <span 
+class="cmtt-10">$CATALINA_BASE/bin/catalina.sh</span>
+         <div class="quote">
+         <!--l. 214--><p class="noindent"><span 
+class="cmtt-10">JAVA_OPTS="$JAVA_OPTS -Dsptmail.data.directory=/var/data/webmail"</span></div>
+     </li>
+     <li class="enumerate" value="6" 
+><a 
+ id="x1-8014x6"></a>Make sure that you have the latest <a 
+href="http://java.sun.com/products/javamail/" ><span 
+class="cmss-10">JavaMail API</span></a> library available to the applications deployed on the
+     J2EE/Servlet container. You can copy the <span 
+class="cmtt-10">lib/mail.jar </span>file as appropriate if so desired.
+     </li>
+     <li class="enumerate" value="7" 
+><a 
+ id="x1-8016x7"></a>Deploy the <span 
+class="cmtt-10">mail.war </span>from the distribution to the container. You may have to rename the war file to
+     something else (for example, webmail.war) if you wish to customise the root path at which the application
+     is to be accessed. If you do so, edit <span 
+class="cmtt-10">config/web.xml </span>and modify the <span 
+class="cmtt-10">init-param </span>for <span 
+class="cmtt-10">logout servlet </span>to
+     match your modification.
+     </li>
+     <li class="enumerate" value="8" 
+><a 
+ id="x1-8018x8"></a>Set up backup jobs for the <span 
+class="cmtt-10">data directory </span>if desired to ensure that the server properties, address book
+     and user preferences XML files are not lost.</li></ol>
+<div class="table">
+                                                                                       
+
+                                                                                       
+<!--l. 220--><p class="noindent"><a 
+ id="x1-80152"></a><hr class="float"><div class="float" 
+><table class="float"><tr class="float"><td class="float" 
+>
+                                                                                       
+
+                                                                                       
+ <table class="caption" 
+><tr valign="baseline" class="caption"><td class="id">Table&#x00A0;2: </td><td  
+class="content">Test Environment</td></tr></table><!--tex4ht:label?: x1-80152 -->
+<div class="tabular"><table class="tabular" 
+cellspacing="0" cellpadding="0" rules="groups" 
+frame="border" id="TBL-2-" ><colgroup id="TBL-2-1g"><col 
+id="TBL-2-1"></colgroup><colgroup id="TBL-2-2g"><col 
+id="TBL-2-2"></colgroup><colgroup id="TBL-2-3g"><col 
+id="TBL-2-3"></colgroup><tr 
+class="hline"><td><hr></td><td><hr></td><td><hr></td></tr><tr  
+ valign="baseline" id="TBL-2-1-"><td  style="white-space:nowrap; text-align:left;" id="TBL-2-1-1"  
+class="td11"><span 
+class="cmbx-10">Software </span></td><td  style="white-space:nowrap; text-align:left;" id="TBL-2-1-2"  
+class="td11"><span 
+class="cmbx-10">Version    </span></td><td  style="white-space:wrap; text-align:left;" id="TBL-2-1-3"  
+class="td11"><!--l. 225--><p class="noindent"><span 
+class="cmbx-10">Description</span>                                                           </td>
+</tr><tr 
+class="hline"><td><hr></td><td><hr></td><td><hr></td></tr><tr  
+ valign="baseline" id="TBL-2-2-"><td  style="white-space:nowrap; text-align:left;" id="TBL-2-2-1"  
+class="td11">Tomcat    </td><td  style="white-space:nowrap; text-align:left;" id="TBL-2-2-2"  
+class="td11">5.5.17        </td><td  style="white-space:wrap; text-align:left;" id="TBL-2-2-3"  
+class="td11"><!--l. 227--><p class="noindent">Servlet container used to deploy the application.                      </td>
+</tr><tr 
+class="hline"><td><hr></td><td><hr></td><td><hr></td></tr><tr  
+ valign="baseline" id="TBL-2-3-"><td  style="white-space:nowrap; text-align:left;" id="TBL-2-3-1"  
+class="td11">Dovecot   </td><td  style="white-space:nowrap; text-align:left;" id="TBL-2-3-2"  
+class="td11">1.0beta8     </td><td  style="white-space:wrap; text-align:left;" id="TBL-2-3-3"  
+class="td11"><!--l. 229--><p class="noindent">The IMAP server used by <span 
+  class="cmss-10"><a href='http://www.sptci.com/'>Sans Pareil Technologies, Inc.</a></span>.            </td>
+</tr><tr 
+class="hline"><td><hr></td><td><hr></td><td><hr></td></tr><tr  
+ valign="baseline" id="TBL-2-4-"><td  style="white-space:nowrap; text-align:left;" id="TBL-2-4-1"  
+class="td11">Postfix     </td><td  style="white-space:nowrap; text-align:left;" id="TBL-2-4-2"  
+class="td11">2.3            </td><td  style="white-space:wrap; text-align:left;" id="TBL-2-4-3"  
+class="td11"><!--l. 231--><p class="noindent">The SMTP server used by <span 
+  class="cmss-10"><a href='http://www.sptci.com/'>Sans Pareil Technologies, Inc.</a></span>.            </td>
+</tr><tr 
+class="hline"><td><hr></td><td><hr></td><td><hr></td></tr><tr  
+ valign="baseline" id="TBL-2-5-"><td  style="white-space:nowrap; text-align:left;" id="TBL-2-5-1"  
+class="td11">Solaris     </td><td  style="white-space:nowrap; text-align:left;" id="TBL-2-5-2"  
+class="td11">10             </td><td  style="white-space:wrap; text-align:left;" id="TBL-2-5-3"  
+class="td11"><!--l. 233--><p class="noindent">The operating system used on <span 
+  class="cmss-10"><a href='http://www.sptci.com/'>Sans Pareil Technologies, Inc.</a> </span>server.</td>
+</tr><tr 
+class="hline"><td><hr></td><td><hr></td><td><hr></td></tr><tr  
+ valign="baseline" id="TBL-2-6-"><td  style="white-space:nowrap; text-align:left;" id="TBL-2-6-1"  
+class="td11">Mac OS X</td><td  style="white-space:nowrap; text-align:left;" id="TBL-2-6-2"  
+class="td11">10.4 (Tiger)</td><td  style="white-space:wrap; text-align:left;" id="TBL-2-6-3"  
+class="td11"><!--l. 235--><p class="noindent">The client operating system used for testing.                           </td>
+</tr><tr 
+class="hline"><td><hr></td><td><hr></td><td><hr></td></tr><tr  
+ valign="baseline" id="TBL-2-7-"><td  style="white-space:nowrap; text-align:left;" id="TBL-2-7-1"  
+class="td11">FireFox    </td><td  style="white-space:nowrap; text-align:left;" id="TBL-2-7-2"  
+class="td11">1.5, 2.0      </td><td  style="white-space:wrap; text-align:left;" id="TBL-2-7-3"  
+class="td11"><!--l. 237--><p class="noindent">The recommended browser for using the application.                </td>
+</tr><tr 
+class="hline"><td><hr></td><td><hr></td><td><hr></td></tr><tr  
+ valign="baseline" id="TBL-2-8-"><td  style="white-space:nowrap; text-align:left;" id="TBL-2-8-1"  
+class="td11">Safari      </td><td  style="white-space:nowrap; text-align:left;" id="TBL-2-8-2"  
+class="td11">2.0.4          </td><td  style="white-space:wrap; text-align:left;" id="TBL-2-8-3"  
+class="td11"><!--l. 239--><p class="noindent">Works mostly. Replying, forwarding messages leads to hard error
+in <span 
+class="cmss-10">EPNG RichTextArea </span>rendering session unusable.                    </td>
+</tr><tr 
+class="hline"><td><hr></td><td><hr></td><td><hr></td></tr><tr  
+ valign="baseline" id="TBL-2-9-"><td  style="white-space:nowrap; text-align:left;" id="TBL-2-9-1"  
+class="td11">Opera      </td><td  style="white-space:nowrap; text-align:left;" id="TBL-2-9-2"  
+class="td11">9.0            </td><td  style="white-space:wrap; text-align:left;" id="TBL-2-9-3"  
+class="td11"><!--l. 242--><p class="noindent">Works. Some slight issues with fonts, but otherwise seems to work
+perfectly.                                                                         </td>
+</tr><tr 
+class="hline"><td><hr></td><td><hr></td><td><hr></td></tr><tr  
+ valign="baseline" id="TBL-2-10-"><td  style="white-space:nowrap; text-align:left;" id="TBL-2-10-1"  
+class="td11">              </td>
+</tr></table></div>
+
+<div class="footnote-text">
+  <!--l. 65--><p class="noindent"><span class="footnote-mark"><a 
+ id="fn1x0">    <sup>1</sup></a></span><span 
+class="cmr-8">POP stores should work fine since </span><a 
+href="http://java.sun.com/products/javamail/" ><span 
+class="cmss-8">JavaMail API</span></a> <span 
+class="cmr-8">abstracts the differences between </span><a 
+href="http://www.ietf.org/rfc/rfc2060.txt" ><span 
+class="cmss-8">IMAP</span></a> <span 
+class="cmr-8">and POP.</span></div>
+
+<div class="footnote-text">
+  <!--l. 90--><p class="noindent"><span class="footnote-mark"><a 
+ id="fn2x0">    <sup>2</sup></a></span><span 
+class="cmr-8">No library under the GPL is used by the system</span></div>
+
+<div class="footnote-text">
+  <!--l. 112--><p class="noindent"><span class="footnote-mark"><a 
+ id="fn3x0">    <sup>3</sup></a></span><span 
+class="cmr-8">Not implemented properly at present.</span></div>
+
+<div class="footnote-text">
+  <!--l. 138--><p class="noindent"><span class="footnote-mark"><a 
+ id="fn4x0">    <sup>4</sup></a></span><span 
+class="cmr-8">http://www.nextapp.com/platform/echo2/echo/doc/api/public/app/nextapp/echo2/app/ListBox.html</span></div>
+
+<div class="footnote-text">
+  <!--l. 158--><p class="noindent"><span class="footnote-mark"><a 
+ id="fn5x0">    <sup>5</sup></a></span><span 
+class="cmr-8">Currently only inline is supported.</span></div>
+
+<div class="footnote-text">
+  <!--l. 198--><p class="noindent"><span class="footnote-mark"><a 
+ id="fn6x0">    <sup>6</sup></a></span><span 
+class="cmr-8">Standard Java 1.5 XML properties file.</span></div>
+</div>
+
+</body>
+</html>
